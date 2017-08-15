@@ -13,22 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.data.jdbc.mapping.model;
+package org.springframework.data.jdbc.annotation;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * @author Greg Turnquist
+ * @author Jens Schauder
  */
-public interface NamingStrategy {
-
-	String getSchema();
-
-	String getTableName(Class<?> type);
-
-	String getColumnName(JdbcPersistentProperty property);
-
-	default String getQualifiedTableName(Class<?> type) {
-		return this.getSchema() + (this.getSchema().equals("") ? "" : ".") + this.getTableName(type);
-	}
-
-	String getBackReferenceColumnName(JdbcPersistentProperty basicJdbcPersistentProperty);
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ ElementType.METHOD, ElementType.FIELD })
+public @interface Column {
+	String value();
 }

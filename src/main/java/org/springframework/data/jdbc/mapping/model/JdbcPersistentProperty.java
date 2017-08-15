@@ -39,4 +39,13 @@ public interface JdbcPersistentProperty extends PersistentProperty<JdbcPersisten
 	 * @return a {@link Class} that is suitable for usage with JDBC drivers
 	 */
 	Class<?> getColumnType();
+
+	/**
+	 * The column name in the table representing a referenced entity which contains the foreign key to the the table
+	 * representing the entity this property belongs to.
+	 * 
+	 * @return name of the column.
+	 * @throws IllegalStateException iff this property is not an entity.
+	 */
+	String getBackReferenceColumnName();
 }

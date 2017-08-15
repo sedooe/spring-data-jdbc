@@ -57,7 +57,8 @@ public class SqlGeneratorUnitTests {
 				.contains("DummyEntity.id AS id,") //
 				.contains("DummyEntity.name AS name,") //
 				.contains("ref.l1id AS ref_l1id") //
-				.contains("ref.content AS ref_content").contains(" FROM DummyEntity");
+				.contains("ref.content AS ref_content").contains(" FROM DummyEntity")
+				.contains("LEFT OUTER JOIN ReferencedEntity AS ref").contains("ON ref.ref = DummyEntity.id");
 		softAssertions.assertAll();
 	}
 

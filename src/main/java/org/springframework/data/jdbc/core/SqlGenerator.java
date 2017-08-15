@@ -126,6 +126,7 @@ class SqlGenerator {
 	private SelectBuilder createSelectBuilder() {
 		SelectBuilder builder = new SelectBuilder(entity.getTableName());
 
+		// select the non entity columns from the main table
 		for (JdbcPersistentProperty property : entity) {
 			if (!property.isEntity()) {
 
@@ -136,13 +137,14 @@ class SqlGenerator {
 			}
 		}
 
+		// add an outer join for each single valued references
 		for (JdbcPersistentProperty property : entity) {
 			if (property.isEntity()) {
 
 				JdbcPersistentEntity<?> refEntity = context.getRequiredPersistentEntity(property.getType());
 				String joinAlias = property.getName();
 				builder.join(jb -> jb.leftOuter().table(refEntity.getTableName()).as(joinAlias) //
-						.where(entity.getTableName()).eq().column(entity.getTableName(), entity.getIdColumn()));
+						.where(property.getBackReferenceColumnName()).eq().column(entity.getTableName(), entity.getIdColumn()));
 
 				for (JdbcPersistentProperty refProperty : refEntity) {
 					builder.column( //

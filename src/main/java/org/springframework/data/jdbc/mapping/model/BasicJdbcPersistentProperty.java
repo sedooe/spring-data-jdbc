@@ -97,6 +97,16 @@ public class BasicJdbcPersistentProperty extends AnnotationBasedPersistentProper
 		return columnType == null ? columnTypeForNonEntity(getType()) : columnType;
 	}
 
+	@Override
+	public String getBackReferenceColumnName() {
+
+		if (!isEntity())
+			throw new IllegalStateException(
+					"BackReferenceColumnName is only supported for properties referencing an entity.");
+
+		return context.getNamingStrategy().getBackReferenceColumnName(this);
+	}
+
 	private Class columnTypeIfEntity(Class type) {
 
 		JdbcPersistentEntity<?> persistentEntity = context.getPersistentEntity(type);

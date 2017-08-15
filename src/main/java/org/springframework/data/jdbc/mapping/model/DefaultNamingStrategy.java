@@ -16,11 +16,9 @@
 package org.springframework.data.jdbc.mapping.model;
 
 /**
- * Basic implementation of {@link NamingStrategy} with no schema, table based on {@link Class} and
- * column name based on {@link JdbcPersistentProperty}.
- *
- * NOTE: Can also be used as an adapter. Create an anonymous subclass and override any settings to implement
- * a different strategy on the fly.
+ * Basic implementation of {@link NamingStrategy} with no schema, table based on {@link Class} and column name based on
+ * {@link JdbcPersistentProperty}. NOTE: Can also be used as an adapter. Create an anonymous subclass and override any
+ * settings to implement a different strategy on the fly.
  *
  * @author Greg Turnquist
  */
@@ -42,12 +40,16 @@ public class DefaultNamingStrategy implements NamingStrategy {
 		return type.getSimpleName();
 	}
 
-
 	/**
 	 * Look up the {@link JdbcPersistentProperty}'s name.
 	 */
 	@Override
 	public String getColumnName(JdbcPersistentProperty property) {
 		return property.getName();
+	}
+
+	@Override
+	public String getBackReferenceColumnName(JdbcPersistentProperty property) {
+		return getColumnName(property);
 	}
 }
