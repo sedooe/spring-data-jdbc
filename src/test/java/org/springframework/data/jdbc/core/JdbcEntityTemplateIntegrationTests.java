@@ -222,6 +222,43 @@ public class JdbcEntityTemplateIntegrationTests {
 		return entity;
 	}
 
+
+
+	@Test // DATAJDBC-125
+	public void saveAndLoadAnEntityWithSecondaryReferenceNull() {
+
+		template.save(legoSet, LegoSet.class);
+
+		assertThat(legoSet.manual.id).describedAs("id of stored manual").isNotNull();
+
+		LegoSet reloadedLegoSet = template.findById(legoSet.getId(), LegoSet.class);
+
+		assertThat(reloadedLegoSet.alternativeInstructions).isNull();
+	}
+
+
+
+	@Test // DATAJDBC-125
+	public void saveAndLoadAnEntityWithSecondaryReferenceNotNull() {
+
+		legoSet.alternativeInstructions = new Manual(null);
+		legoSet.alternativeInstructions.content = "alternative content";
+		template.save(legoSet, LegoSet.class);
+
+		assertThat(legoSet.manual.id).describedAs("id of stored manual").isNotNull();
+
+		LegoSet reloadedLegoSet = template.findById(legoSet.getId(), LegoSet.class);
+
+		SoftAssertions softly = new SoftAssertions();
+		softly.assertThat(reloadedLegoSet.alternativeInstructions).isNotNull();
+		softly.assertThat(reloadedLegoSet.alternativeInstructions.id).isNotNull();
+		softly.assertThat(reloadedLegoSet.alternativeInstructions.id).isNotEqualTo(reloadedLegoSet.manual.id);
+		softly.assertThat(reloadedLegoSet.alternativeInstructions.content).isEqualTo(reloadedLegoSet.alternativeInstructions.content);
+
+		softly.assertAll();
+	}
+
+
 	@Data
 	static class LegoSet {
 
@@ -229,8 +266,9 @@ public class JdbcEntityTemplateIntegrationTests {
 
 		private String name;
 
-		private Manual manual;
+		private Manual alternativeInstructions;
 
+		private Manual manual;
 	}
 
 	@Data
@@ -238,7 +276,6 @@ public class JdbcEntityTemplateIntegrationTests {
 
 		@Id private final Long id;
 		private String content;
-
 	}
 
 	@Configuration
@@ -254,7 +291,8 @@ public class JdbcEntityTemplateIntegrationTests {
 		JdbcEntityOperations operations(ApplicationEventPublisher publisher,
 				NamedParameterJdbcOperations namedParameterJdbcOperations) {
 
-			return new JdbcEntityTemplate(publisher, namedParameterJdbcOperations, new JdbcMappingContext(new DefaultNamingStrategy()));
+			return new JdbcEntityTemplate(publisher, namedParameterJdbcOperations,
+					new JdbcMappingContext(new DefaultNamingStrategy()));
 		}
 	}
 }

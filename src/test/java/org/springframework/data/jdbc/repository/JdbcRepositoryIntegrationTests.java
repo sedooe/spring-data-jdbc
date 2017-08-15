@@ -212,9 +212,8 @@ public class JdbcRepositoryIntegrationTests {
 		entity.setName("something else");
 		DummyEntity saved = repository.save(entity);
 
-		assertThat(repository.findById(entity.getIdProp())).hasValueSatisfying(it -> {
-			assertThat(it.getName()).isEqualTo(saved.getName());
-		});
+		assertThat(repository.findById(entity.getIdProp())) //
+				.hasValueSatisfying(it -> assertThat(it.getName()).isEqualTo(saved.getName()));
 	}
 
 	@Test // DATAJDBC-98
