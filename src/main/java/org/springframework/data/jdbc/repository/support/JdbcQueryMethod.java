@@ -18,6 +18,7 @@ package org.springframework.data.jdbc.repository.support;
 import java.lang.reflect.Method;
 
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.data.jdbc.repository.query.Query;
 import org.springframework.data.projection.ProjectionFactory;
 import org.springframework.data.repository.core.RepositoryMetadata;
@@ -36,15 +37,23 @@ public class JdbcQueryMethod extends QueryMethod {
 	private final Method method;
 
 	public JdbcQueryMethod(Method method, RepositoryMetadata metadata, ProjectionFactory factory) {
+
 		super(method, metadata, factory);
 
 		this.method = method;
 	}
 
 	public String getAnnotatedQuery() {
+		return getMergedAnnotationAttribute("value");
+	}
+
+	private <T> T getMergedAnnotationAttribute(String attribute) {
 
 		Query queryAnnotation = AnnotatedElementUtils.findMergedAnnotation(method, Query.class);
+		return (T) AnnotationUtils.getValue(queryAnnotation, attribute);
+	}
 
-		return queryAnnotation == null ? null : queryAnnotation.value();
+	public Class<?> getRowMapperClass() {
+		return getMergedAnnotationAttribute("rowMapperClass");
 	}
 }
