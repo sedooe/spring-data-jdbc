@@ -24,6 +24,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.datasource.init.DataSourceInitializer;
 import org.springframework.jdbc.datasource.init.DatabasePopulator;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
+import org.testcontainers.containers.MySQLContainer;
 
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 
@@ -37,14 +38,21 @@ import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 @Profile("mysql")
 class MySqlDataSourceConfiguration extends DataSourceConfiguration {
 
+	private static final MySQLContainer MYSQL_CONTAINER = new MySQLContainer();
+
+	static {
+		MYSQL_CONTAINER.withConfigurationOverride("mysql_cnf_override").withDatabaseName("test").start();
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.data.jdbc.testing.DataSourceConfiguration#createDataSource()
 	 */
+	@Override
 	protected DataSource createDataSource() {
 
-		MysqlDataSource dataSource = new MysqlDataSource();
-		dataSource.setUrl("jdbc:mysql:///test?user=root");
+		MysqlDataSource dataSource = getCommonDataSource();
+		dataSource.setDatabaseName(MYSQL_CONTAINER.getDatabaseName());
 
 		return dataSource;
 	}
@@ -52,8 +60,7 @@ class MySqlDataSourceConfiguration extends DataSourceConfiguration {
 	@PostConstruct
 	public void initDatabase() {
 
-		MysqlDataSource dataSource = new MysqlDataSource();
-		dataSource.setUrl("jdbc:mysql:///?user=root");
+		MysqlDataSource dataSource = getCommonDataSource();
 
 		ClassPathResource createScript = new ClassPathResource("create-mysql.sql");
 		DatabasePopulator databasePopulator = new ResourceDatabasePopulator(createScript);
@@ -62,5 +69,15 @@ class MySqlDataSourceConfiguration extends DataSourceConfiguration {
 		initializer.setDatabasePopulator(databasePopulator);
 		initializer.setDataSource(dataSource);
 		initializer.afterPropertiesSet();
+	}
+
+	private MysqlDataSource getCommonDataSource() {
+
+		MysqlDataSource dataSource = new MysqlDataSource();
+		dataSource.setUrl(MYSQL_CONTAINER.getJdbcUrl());
+		dataSource.setUser(MYSQL_CONTAINER.getUsername());
+		dataSource.setPassword(MYSQL_CONTAINER.getPassword());
+
+		return dataSource;
 	}
 }
